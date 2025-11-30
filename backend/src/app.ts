@@ -1,6 +1,8 @@
 import { errors } from 'celebrate'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import 'dotenv/config'
 import express, { json, urlencoded } from 'express'
 import mongoose from 'mongoose'
@@ -14,18 +16,34 @@ const { PORT = 3000 } = process.env
 const app = express()
 const ORIGIN_ALLOW = process.env.ORIGIN_ALLOW || 'http://localhost:5173'
 
+const globalLimitter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    message: { message: 'Слишком много попыток, повторите позже' },
+    standardHeaders: true,
+    legacyHeaders: false,
+})
+
 app.use(cookieParser())
 
+app.use(
+    helmet({
+        crossOriginResourcePolicy: false,
+    })
+)
 //app.use(cors())
-app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
+app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }))
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(serveStatic(path.join(__dirname, 'public')))
 
-app.use(urlencoded({ extended: true }))
-app.use(json())
+app.use(urlencoded({ extended: true, limit: '1mb' }))
+app.use(json({ limit: '1mb' }))
 
 app.options('*', cors())
+
+app.use(globalLimitter)
+
 app.use(routes)
 app.use(errors())
 app.use(errorHandler)

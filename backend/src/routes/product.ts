@@ -13,15 +13,15 @@ import {
 } from '../middlewares/validations'
 import { Role } from '../models/user'
 import { normalizePagination } from '../middlewares/pagination'
-import {
-  PAGE_DEFAULT,
-  PAGE_DEFAULT_LIMIT,
-  PAGE_MAX_LIMIT
-} from '../contants';
+import { PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT } from '../contants'
 
 const productRouter = Router()
 
-productRouter.get('/', normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT), getProducts)
+productRouter.get(
+    '/',
+    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT),
+    getProducts
+)
 productRouter.post(
     '/',
     auth,
