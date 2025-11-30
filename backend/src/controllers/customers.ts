@@ -1,17 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery } from 'mongoose'
-import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
 import Order from '../models/order'
 import User, { IUser } from '../models/user'
-
-const normalizeSearch = (rawSearch: unknown) => {
-    if (typeof rawSearch !== 'string') {
-        throw new BadRequestError('Некорректное значение поискового запроса')
-    }
-    const escaped = rawSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    return new RegExp(escaped, 'i')
-}
+import { normalizeSearch } from '../utils/search'
 
 // TODO: Добавить guard admin
 // eslint-disable-next-line max-len
