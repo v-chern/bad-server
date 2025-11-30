@@ -17,8 +17,8 @@ const app = express()
 const ORIGIN_ALLOW = process.env.ORIGIN_ALLOW || 'http://localhost:5173'
 
 const globalLimitter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 300,
+    windowMs: 60 * 1000,
+    max: 50,
     message: { message: 'Слишком много попыток, повторите позже' },
     standardHeaders: true,
     legacyHeaders: false,
