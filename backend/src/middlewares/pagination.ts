@@ -17,5 +17,6 @@ export const normalizePagination = (
 
     req.query.page = String(page);
     req.query.limit = String(limit);
+    next();
   }
 }
