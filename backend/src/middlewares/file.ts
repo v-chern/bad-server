@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import multer, { FileFilterCallback } from 'multer'
+import sharp from 'sharp'
 import {
     defineUploadDir,
     defineUniqueFileName,
@@ -39,6 +40,8 @@ const types = [
     'image/svg+xml',
 ]
 
+const formats = ['png', 'jpg', 'jpeg', 'gif', 'svg']
+
 const fileFilter = (
     _req: Request,
     file: Express.Multer.File,
@@ -60,10 +63,23 @@ const uploadFile = multer({
     },
 })
 
+const validateMetaData = async (filePath: string) => {
+  try {
+    const metadata = await sharp(filePath).metadata();
+    if (!metadata.format || 
+        !metadata.width || !metadata.height ||
+        !formats.includes(metadata.format)) {
+        throw new BadRequestError('Недопустимый формат изображения');
+    }
+  } catch (err) {
+    throw new BadRequestError('Некорректный файл изображения');
+  }
+}
+
 export const singleFileUpload =
     (field = 'file') =>
     (req: Request, res: Response, next: NextFunction) => {
-        uploadFile.single(field)(req, res, (err) => {
+        uploadFile.single(field)(req, res, async (err) => {
             if (
                 err instanceof multer.MulterError &&
                 err.code === 'LIMIT_FILE_SIZE'
@@ -87,6 +103,12 @@ export const singleFileUpload =
                 )
             }
 
+            try {
+                await validateMetaData(file.path);
+            } catch (err) {
+                removeFile(file.path);
+                return next(err);
+            }
             return next(err)
         })
     }

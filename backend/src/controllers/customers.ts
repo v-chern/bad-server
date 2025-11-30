@@ -1,8 +1,17 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery } from 'mongoose'
+import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
 import Order from '../models/order'
 import User, { IUser } from '../models/user'
+
+const normalizeSearch = (rawSearch: unknown) => {
+    if (typeof rawSearch !== 'string') {
+        throw new BadRequestError('Некорректное значение поискового запроса')
+    }
+    const escaped = rawSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(escaped, 'i')
+}
 
 // TODO: Добавить guard admin
 // eslint-disable-next-line max-len
@@ -92,7 +101,7 @@ export const getCustomers = async (
         }
 
         if (search) {
-            const searchRegex = new RegExp(search as string, 'i')
+            const searchRegex = normalizeSearch(search)
             const orders = await Order.find(
                 {
                     $or: [{ deliveryAddress: searchRegex }],
