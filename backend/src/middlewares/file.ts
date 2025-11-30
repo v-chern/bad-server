@@ -44,6 +44,7 @@ const fileFilter = (
     if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }
+    console.log(file);
 
     return cb(null, true)
 }

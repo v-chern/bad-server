@@ -1,12 +1,13 @@
-import { Router } from 'express'
+import { Router } from 'express';
 import {
     deleteCustomer,
     getCustomerById,
     getCustomers,
     updateCustomer,
-} from '../controllers/customers'
-import auth from '../middlewares/auth'
-import { normalizePagination } from '../middlewares/pagination'
+} from '../controllers/customers';
+import auth, { roleGuardMiddleware } from '../middlewares/auth';
+import { Role } from '../models/user';
+import { normalizePagination } from '../middlewares/pagination';
 import {
   PAGE_DEFAULT,
   PAGE_DEFAULT_LIMIT,
@@ -15,9 +16,14 @@ import {
 
 const customerRouter = Router()
 
-customerRouter.get('/', auth, normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT), getCustomers)
-customerRouter.get('/:id', auth, getCustomerById)
-customerRouter.patch('/:id', auth, updateCustomer)
-customerRouter.delete('/:id', auth, deleteCustomer)
+customerRouter.get('/',
+  auth,
+  roleGuardMiddleware(Role.Admin),
+  normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT),
+  getCustomers
+);
+customerRouter.get('/:id', auth, getCustomerById);
+customerRouter.patch('/:id', auth, updateCustomer);
+customerRouter.delete('/:id', auth, deleteCustomer);
 
-export default customerRouter
+export default customerRouter;
