@@ -50,18 +50,21 @@ export const validateOrderBody = celebrate({
         email: Joi.string().email().required().messages({
             'string.empty': 'Не указан email',
         }),
-        phone: Joi.string().required().custom((value, helpers) => {
-          const clean = value.replace(/[^\d+]/g, '');
+        phone: Joi.string()
+            .required()
+            .custom((value, helpers) => {
+                const clean = value.replace(/[^\d+]/g, '')
 
-          if (!phoneRegExp.test(clean)) {
-            return helpers.error('pattern.invalid');
-          }
+                if (!phoneRegExp.test(clean)) {
+                    return helpers.error('pattern.invalid')
+                }
 
-          return clean; // вернёт нормализованную строку в value
-        }).messages({
-            'string.empty': 'Не указан телефон',
-            'pattern.invalid': 'Некорректный формат телефона',
-        }),
+                return clean // вернёт нормализованную строку в value
+            })
+            .messages({
+                'string.empty': 'Не указан телефон',
+                'pattern.invalid': 'Некорректный формат телефона',
+            }),
         address: Joi.string().required().messages({
             'string.empty': 'Не указан адрес',
         }),

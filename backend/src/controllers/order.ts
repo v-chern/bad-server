@@ -31,8 +31,11 @@ export const getOrders = async (
             search,
         } = req.query
 
-        const pageNumber = Number(page) || PAGE_DEFAULT;
-        const limitNumber = Math.min(Number(limit) || PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE);
+        const pageNumber = Number(page) || PAGE_DEFAULT
+        const limitNumber = Math.min(
+            Number(limit) || PAGE_DEFAULT_SIZE,
+            PAGE_MAX_SIZE
+        )
 
         const filters: FilterQuery<Partial<IOrder>> = {}
 
@@ -164,8 +167,11 @@ export const getOrdersCurrentUser = async (
         const userId = res.locals.user._id
         const { search, page = 1, limit = 5 } = req.query
 
-        const pageNumber = Number(page) || PAGE_DEFAULT;
-        const limitNumber = Math.min(Number(limit) || PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE);
+        const pageNumber = Number(page) || PAGE_DEFAULT
+        const limitNumber = Math.min(
+            Number(limit) || PAGE_DEFAULT_SIZE,
+            PAGE_MAX_SIZE
+        )
 
         const options = {
             skip: (pageNumber - 1) * limitNumber,
