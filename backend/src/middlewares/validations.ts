@@ -1,8 +1,18 @@
 import { Joi, celebrate } from 'celebrate'
+import { PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT, SEARCH_STR_MAX_LEN } from '../contants'
 import { Types } from 'mongoose'
+
+export enum StatusType {
+    Cancelled = 'cancelled',
+    Completed = 'completed',
+    New = 'new',
+    Delivering = 'delivering',
+}
 
 // eslint-disable-next-line no-useless-escape
 export const phoneRegExp = /^\+?\d[\d\s()-]{3,18}$/
+const SORT_FIELDS = ['createdAt', 'totalAmount', 'orderNumber', 'status']
+const SORT_ORDERS = ['asc', 'desc']
 
 export enum PaymentType {
     Card = 'card',
@@ -133,4 +143,49 @@ export const validateAuthentication = celebrate({
             'string.empty': 'Поле "password" должно быть заполнено',
         }),
     }),
+})
+
+export const validateOrdersQuery = celebrate({
+  query: Joi.object({
+    page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
+    limit: Joi.number().integer().min(1).max(PAGE_MAX_LIMIT).default(PAGE_DEFAULT_LIMIT),
+    search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
+
+    sortField: Joi.string().valid(...SORT_FIELDS).default('createdAt'),
+    sortOrder: Joi.string().valid(...SORT_ORDERS).default('desc'),
+
+    status: Joi.string().valid(...Object.values(StatusType)),
+
+    totalAmountFrom: Joi.number().min(0),
+    totalAmountTo: Joi.number()
+      .min(0)
+      .when('totalAmountFrom', {
+        is: Joi.number().min(0),
+        then: Joi.number().min(Joi.ref('totalAmountFrom')),
+      }),
+
+    orderDateFrom: Joi.date().iso(),
+    orderDateTo: Joi.date()
+      .iso()
+      .when('orderDateFrom', {
+        is: Joi.date().iso(),
+        then: Joi.date().min(Joi.ref('orderDateFrom')),
+      }),
+  }).unknown(false)
+})
+
+export const validateOrdersCurrentQuery = celebrate({
+  query: Joi.object({
+    page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
+    limit: Joi.number().integer().min(1).max(PAGE_MAX_LIMIT).default(PAGE_DEFAULT_LIMIT),
+    search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN)
+  }).unknown(false)
+})
+
+export const validateCustomersQuery = celebrate({
+  query: Joi.object({
+    page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
+    limit: Joi.number().integer().min(1).max(PAGE_MAX_LIMIT).default(PAGE_DEFAULT_LIMIT),
+    search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
+  })
 })
