@@ -63,16 +63,19 @@ const uploadFile = multer({
 })
 
 const validateMetaData = async (filePath: string) => {
-  try {
-    const metadata = await sharp(filePath).metadata();
-    if (!metadata.format || 
-        !metadata.width || !metadata.height ||
-        !formats.includes(metadata.format)) {
-        throw new BadRequestError('Недопустимый формат изображения');
+    try {
+        const metadata = await sharp(filePath).metadata()
+        if (
+            !metadata.format ||
+            !metadata.width ||
+            !metadata.height ||
+            !formats.includes(metadata.format)
+        ) {
+            throw new BadRequestError('Недопустимый формат изображения')
+        }
+    } catch (err) {
+        throw new BadRequestError('Некорректный файл изображения')
     }
-  } catch (err) {
-    throw new BadRequestError('Некорректный файл изображения');
-  }
 }
 
 export const singleFileUpload =
@@ -103,10 +106,10 @@ export const singleFileUpload =
             }
 
             try {
-                await validateMetaData(file.path);
+                await validateMetaData(file.path)
             } catch (err) {
-                removeFile(file.path);
-                return next(err);
+                removeFile(file.path)
+                return next(err)
             }
             return next(err)
         })

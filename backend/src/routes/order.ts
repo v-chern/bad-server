@@ -9,7 +9,11 @@ import {
     updateOrder,
 } from '../controllers/order'
 import auth, { roleGuardMiddleware } from '../middlewares/auth'
-import { validateOrderBody, validateOrdersQuery, validateOrdersCurrentQuery } from '../middlewares/validations'
+import {
+    validateOrderBody,
+    validateOrdersQuery,
+    validateOrdersCurrentQuery,
+} from '../middlewares/validations'
 import { normalizePagination } from '../middlewares/pagination'
 import { PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT } from '../contants'
 import { Role } from '../models/user'

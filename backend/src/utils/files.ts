@@ -20,7 +20,7 @@ export const movingFile = (imagePath: string, from: string, to: string) => {
 export const defineUploadDir = () => {
     const uploadDir = process.env.UPLOAD_PATH_TEMP
         ? join(__dirname, `../public/${process.env.UPLOAD_PATH_TEMP}`)
-        : join(__dirname, '../public')
+        : join(__dirname, '../public/temp')
     if (!existsSync(uploadDir)) {
         mkdirSync(uploadDir, { recursive: true })
     }

@@ -1,7 +1,11 @@
 /* eslint-disable prefer-arrow-callback */
 import mongoose, { Document, Schema, Types } from 'mongoose'
 import validator from 'validator'
-import { StatusType, PaymentType, phoneRegExp } from '../middlewares/validations'
+import {
+    StatusType,
+    PaymentType,
+    phoneRegExp,
+} from '../middlewares/validations'
 import Counter from './counter'
 import User from './user'
 

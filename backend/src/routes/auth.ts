@@ -10,7 +10,10 @@ import {
 } from '../controllers/auth'
 import auth from '../middlewares/auth'
 
-import {validateUserBody, validateAuthentication} from '../middlewares/validations';
+import {
+    validateUserBody,
+    validateAuthentication,
+} from '../middlewares/validations'
 
 const authRouter = Router()
 

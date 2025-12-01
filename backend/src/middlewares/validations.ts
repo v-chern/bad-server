@@ -1,5 +1,10 @@
 import { Joi, celebrate } from 'celebrate'
-import { PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT, SEARCH_STR_MAX_LEN } from '../contants'
+import {
+    PAGE_DEFAULT,
+    PAGE_DEFAULT_LIMIT,
+    PAGE_MAX_LIMIT,
+    SEARCH_STR_MAX_LEN,
+} from '../contants'
 import { Types } from 'mongoose'
 
 export enum StatusType {
@@ -45,9 +50,17 @@ export const validateOrderBody = celebrate({
         email: Joi.string().email().required().messages({
             'string.empty': 'Не указан email',
         }),
-        phone: Joi.string().required().pattern(phoneRegExp).messages({
+        phone: Joi.string().required().custom((value, helpers) => {
+          const clean = value.replace(/[^\d+]/g, '');
+
+          if (!phoneRegExp.test(clean)) {
+            return helpers.error('pattern.invalid');
+          }
+
+          return clean; // вернёт нормализованную строку в value
+        }).messages({
             'string.empty': 'Не указан телефон',
-            'string.pattern.base': 'Некорректный формат телефона',
+            'pattern.invalid': 'Некорректный формат телефона',
         }),
         address: Joi.string().required().messages({
             'string.empty': 'Не указан адрес',
@@ -146,46 +159,62 @@ export const validateAuthentication = celebrate({
 })
 
 export const validateOrdersQuery = celebrate({
-  query: Joi.object({
-    page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
-    limit: Joi.number().integer().min(1).max(PAGE_MAX_LIMIT).default(PAGE_DEFAULT_LIMIT),
-    search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
+    query: Joi.object({
+        page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
+        limit: Joi.number()
+            .integer()
+            .min(1)
+            .max(PAGE_MAX_LIMIT)
+            .default(PAGE_DEFAULT_LIMIT),
+        search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
 
-    sortField: Joi.string().valid(...SORT_FIELDS).default('createdAt'),
-    sortOrder: Joi.string().valid(...SORT_ORDERS).default('desc'),
+        sortField: Joi.string()
+            .valid(...SORT_FIELDS)
+            .default('createdAt'),
+        sortOrder: Joi.string()
+            .valid(...SORT_ORDERS)
+            .default('desc'),
 
-    status: Joi.string().valid(...Object.values(StatusType)),
+        status: Joi.string().valid(...Object.values(StatusType)),
 
-    totalAmountFrom: Joi.number().min(0),
-    totalAmountTo: Joi.number()
-      .min(0)
-      .when('totalAmountFrom', {
-        is: Joi.number().min(0),
-        then: Joi.number().min(Joi.ref('totalAmountFrom')),
-      }),
+        totalAmountFrom: Joi.number().min(0),
+        totalAmountTo: Joi.number()
+            .min(0)
+            .when('totalAmountFrom', {
+                is: Joi.number().min(0),
+                then: Joi.number().min(Joi.ref('totalAmountFrom')),
+            }),
 
-    orderDateFrom: Joi.date().iso(),
-    orderDateTo: Joi.date()
-      .iso()
-      .when('orderDateFrom', {
-        is: Joi.date().iso(),
-        then: Joi.date().min(Joi.ref('orderDateFrom')),
-      }),
-  }).unknown(false)
+        orderDateFrom: Joi.date().iso(),
+        orderDateTo: Joi.date()
+            .iso()
+            .when('orderDateFrom', {
+                is: Joi.date().iso(),
+                then: Joi.date().min(Joi.ref('orderDateFrom')),
+            }),
+    }).unknown(false),
 })
 
 export const validateOrdersCurrentQuery = celebrate({
-  query: Joi.object({
-    page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
-    limit: Joi.number().integer().min(1).max(PAGE_MAX_LIMIT).default(PAGE_DEFAULT_LIMIT),
-    search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN)
-  }).unknown(false)
+    query: Joi.object({
+        page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
+        limit: Joi.number()
+            .integer()
+            .min(1)
+            .max(PAGE_MAX_LIMIT)
+            .default(PAGE_DEFAULT_LIMIT),
+        search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
+    }).unknown(false),
 })
 
 export const validateCustomersQuery = celebrate({
-  query: Joi.object({
-    page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
-    limit: Joi.number().integer().min(1).max(PAGE_MAX_LIMIT).default(PAGE_DEFAULT_LIMIT),
-    search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
-  })
+    query: Joi.object({
+        page: Joi.number().integer().min(1).default(PAGE_DEFAULT),
+        limit: Joi.number()
+            .integer()
+            .min(1)
+            .max(PAGE_MAX_LIMIT)
+            .default(PAGE_DEFAULT_LIMIT),
+        search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
+    }),
 })

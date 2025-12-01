@@ -53,7 +53,7 @@ app.use(errorHandler)
 
 const bootstrap = async () => {
     try {
-        await defineUploadDir();
+        await defineUploadDir()
         await mongoose.connect(DB_ADDRESS)
         await app.listen(PORT, () => console.log('ok'))
     } catch (error) {
