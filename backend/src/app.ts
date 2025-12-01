@@ -11,6 +11,7 @@ import { DB_ADDRESS } from './config'
 import errorHandler from './middlewares/error-handler'
 import serveStatic from './middlewares/serverStatic'
 import routes from './routes'
+import { defineUploadDir } from './utils/files'
 
 const { PORT = 3000 } = process.env
 const app = express()
@@ -52,6 +53,7 @@ app.use(errorHandler)
 
 const bootstrap = async () => {
     try {
+        await defineUploadDir();
         await mongoose.connect(DB_ADDRESS)
         await app.listen(PORT, () => console.log('ok'))
     } catch (error) {
