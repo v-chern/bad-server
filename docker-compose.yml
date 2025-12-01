@@ -33,7 +33,7 @@ services:
       - AUTH_ACCESS_TOKEN_EXPIRY=10y
     volumes:
       - ./backend/src:/app/src
-      - public:/app/src/public
+      - ./backend/src/public:/app/src/public
     ports:
       - 3000:3000
     networks:
@@ -48,7 +48,7 @@ services:
       - 80:80
     volumes:
       - frontend:/var/app
-      - public:/var/public
+      - ./backend/src/public:/var/public
     depends_on:
       - frontend
       - backend
