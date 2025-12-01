@@ -24,8 +24,13 @@ services:
     restart: always
     build:
       context: backend
-    env_file:
-      - backend/.env
+    environment:
+      - PORT=3000
+      - DB_ADDRESS=mongodb://root:example@mongo:27017/weblarek?authSource=admin
+      - UPLOAD_PATH_TEMP=temp
+      - ORIGIN_ALLOW=http://localhost:5173
+      - AUTH_REFRESH_TOKEN_EXPIRY=10y
+      - AUTH_ACCESS_TOKEN_EXPIRY=10y
     volumes:
       - ./backend/src:/app/src
       - public:/app/src/public

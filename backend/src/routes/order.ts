@@ -11,7 +11,7 @@ import {
 import auth, { roleGuardMiddleware } from '../middlewares/auth'
 import { validateOrderBody, validateOrdersQuery, validateOrdersCurrentQuery } from '../middlewares/validations'
 import { normalizePagination } from '../middlewares/pagination'
-import { PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT } from '../contants'
+import { PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE } from '../contants'
 import { Role } from '../models/user'
 
 const orderRouter = Router()
@@ -21,14 +21,14 @@ orderRouter.get(
     '/all',
     auth,
     roleGuardMiddleware(Role.Admin),
-    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT),
+    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE),
     validateOrdersQuery,
     getOrders
 )
 orderRouter.get(
     '/all/me',
     auth,
-    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT),
+    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE),
     validateOrdersCurrentQuery,
     getOrdersCurrentUser
 )

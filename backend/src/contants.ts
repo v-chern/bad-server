@@ -1,6 +1,6 @@
 export const PAGE_DEFAULT = 1
-export const PAGE_DEFAULT_LIMIT = 5
-export const PAGE_MAX_LIMIT = 10
+export const PAGE_DEFAULT_SIZE = 5
+export const PAGE_MAX_SIZE = 10
 
 export const SEARCH_STR_MAX_LEN = 100
 
