@@ -6,6 +6,8 @@ import Order, { IOrder } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
 import { normalizeSearch } from '../utils/search'
+import { PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE } from '../contants'
+import validator from 'validator'
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
@@ -28,6 +30,9 @@ export const getOrders = async (
             orderDateTo,
             search,
         } = req.query
+
+        const pageNumber = Number(page) || PAGE_DEFAULT;
+        const limitNumber = Math.min(Number(limit) || PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE);
 
         const filters: FilterQuery<Partial<IOrder>> = {}
 
@@ -117,8 +122,8 @@ export const getOrders = async (
 
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(page) - 1) * Number(limit) },
-            { $limit: Number(limit) },
+            { $skip: (pageNumber - 1) * limitNumber },
+            { $limit: limitNumber },
             {
                 $group: {
                     _id: '$_id',
@@ -134,15 +139,15 @@ export const getOrders = async (
 
         const orders = await Order.aggregate(aggregatePipeline)
         const totalOrders = await Order.countDocuments(filters)
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / limitNumber)
 
         res.status(200).json({
             orders,
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: pageNumber,
+                pageSize: limitNumber,
             },
         })
     } catch (error) {
@@ -158,9 +163,13 @@ export const getOrdersCurrentUser = async (
     try {
         const userId = res.locals.user._id
         const { search, page = 1, limit = 5 } = req.query
+
+        const pageNumber = Number(page) || PAGE_DEFAULT;
+        const limitNumber = Math.min(Number(limit) || PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE);
+
         const options = {
-            skip: (Number(page) - 1) * Number(limit),
-            limit: Number(limit),
+            skip: (pageNumber - 1) * limitNumber,
+            limit: limitNumber,
         }
 
         const user = await User.findById(userId)
@@ -205,7 +214,7 @@ export const getOrdersCurrentUser = async (
         }
 
         const totalOrders = orders.length
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / limitNumber)
 
         orders = orders.slice(options.skip, options.skip + options.limit)
 
@@ -214,8 +223,8 @@ export const getOrdersCurrentUser = async (
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: pageNumber,
+                pageSize: limitNumber,
             },
         })
     } catch (error) {
@@ -315,7 +324,7 @@ export const createOrder = async (
             payment,
             phone,
             email,
-            comment,
+            comment: validator.escape(comment || ''),
             customer: userId,
             deliveryAddress: address,
         })
