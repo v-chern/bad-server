@@ -9,7 +9,7 @@ import auth, { roleGuardMiddleware } from '../middlewares/auth'
 import { Role } from '../models/user'
 import { validateCustomersQuery } from '../middlewares/validations'
 import { normalizePagination } from '../middlewares/pagination'
-import { PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE } from '../contants'
+import { PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT } from '../contants'
 
 const customerRouter = Router()
 
@@ -17,7 +17,7 @@ customerRouter.get(
     '/',
     auth,
     roleGuardMiddleware(Role.Admin),
-    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE),
+    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_LIMIT, PAGE_MAX_LIMIT),
     validateCustomersQuery,
     getCustomers
 )

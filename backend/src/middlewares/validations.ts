@@ -1,8 +1,8 @@
 import { Joi, celebrate } from 'celebrate'
 import {
     PAGE_DEFAULT,
-    PAGE_DEFAULT_SIZE,
-    PAGE_MAX_SIZE,
+    PAGE_DEFAULT_LIMIT,
+    PAGE_MAX_LIMIT,
     SEARCH_STR_MAX_LEN,
 } from '../contants'
 import { Types } from 'mongoose'
@@ -164,8 +164,8 @@ export const validateOrdersQuery = celebrate({
         limit: Joi.number()
             .integer()
             .min(1)
-            .max(PAGE_MAX_SIZE)
-            .default(PAGE_DEFAULT_SIZE),
+            .max(PAGE_MAX_LIMIT)
+            .default(PAGE_DEFAULT_LIMIT),
         search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
 
         sortField: Joi.string()
@@ -201,8 +201,8 @@ export const validateOrdersCurrentQuery = celebrate({
         limit: Joi.number()
             .integer()
             .min(1)
-            .max(PAGE_MAX_SIZE)
-            .default(PAGE_DEFAULT_SIZE),
+            .max(PAGE_MAX_LIMIT)
+            .default(PAGE_DEFAULT_LIMIT),
         search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
     }).unknown(false),
 })
@@ -213,8 +213,8 @@ export const validateCustomersQuery = celebrate({
         limit: Joi.number()
             .integer()
             .min(1)
-            .max(PAGE_MAX_SIZE)
-            .default(PAGE_DEFAULT_SIZE),
+            .max(PAGE_MAX_LIMIT)
+            .default(PAGE_DEFAULT_LIMIT),
         search: Joi.string().trim().min(1).max(SEARCH_STR_MAX_LEN),
     }),
 })
