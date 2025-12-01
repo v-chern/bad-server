@@ -1,6 +1,13 @@
-import { Request, Express } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import multer, { FileFilterCallback } from 'multer'
-import { join } from 'path'
+import sharp from 'sharp'
+import {
+    defineUploadDir,
+    defineUniqueFileName,
+    removeFile,
+} from '../utils/files'
+import BadRequestError from '../errors/bad-request-error'
+import { MAX_FILE_SIZE_B, MIN_FILE_SIZE_B } from '../contants'
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
@@ -11,15 +18,9 @@ const storage = multer.diskStorage({
         _file: Express.Multer.File,
         cb: DestinationCallback
     ) => {
-        cb(
-            null,
-            join(
-                __dirname,
-                process.env.UPLOAD_PATH_TEMP
-                    ? `../public/${process.env.UPLOAD_PATH_TEMP}`
-                    : '../public'
-            )
-        )
+        const uploadDir = defineUploadDir()
+
+        cb(null, uploadDir)
     },
 
     filename: (
@@ -27,7 +28,7 @@ const storage = multer.diskStorage({
         file: Express.Multer.File,
         cb: FileNameCallback
     ) => {
-        cb(null, file.originalname)
+        cb(null, defineUniqueFileName(file.originalname))
     },
 })
 
@@ -38,6 +39,8 @@ const types = [
     'image/gif',
     'image/svg+xml',
 ]
+
+const formats = ['png', 'jpg', 'jpeg', 'gif', 'svg']
 
 const fileFilter = (
     _req: Request,
@@ -51,4 +54,63 @@ const fileFilter = (
     return cb(null, true)
 }
 
-export default multer({ storage, fileFilter })
+const uploadFile = multer({
+    storage,
+    fileFilter,
+    limits: {
+        fileSize: MAX_FILE_SIZE_B,
+    },
+})
+
+const validateMetaData = async (filePath: string) => {
+    try {
+        const metadata = await sharp(filePath).metadata()
+        if (
+            !metadata.format ||
+            !metadata.width ||
+            !metadata.height ||
+            !formats.includes(metadata.format)
+        ) {
+            throw new BadRequestError('Недопустимый формат изображения')
+        }
+    } catch (err) {
+        throw new BadRequestError('Некорректный файл изображения')
+    }
+}
+
+export const singleFileUpload =
+    (field = 'file') =>
+    (req: Request, res: Response, next: NextFunction) => {
+        uploadFile.single(field)(req, res, async (err) => {
+            if (
+                err instanceof multer.MulterError &&
+                err.code === 'LIMIT_FILE_SIZE'
+            ) {
+                return next(
+                    new BadRequestError('Файл превышает допустимый размер')
+                )
+            }
+
+            const file = req.file
+            if (!file) {
+                return next(new BadRequestError('Файл не загружен'))
+            }
+
+            if (file.size < MIN_FILE_SIZE_B) {
+                removeFile(file.path)
+                return next(
+                    new BadRequestError(
+                        `Файл слишком маленький. Минимальный размер: ${MIN_FILE_SIZE_B} байт`
+                    )
+                )
+            }
+
+            try {
+                await validateMetaData(file.path)
+            } catch (err) {
+                removeFile(file.path)
+                return next(err)
+            }
+            return next(err)
+        })
+    }

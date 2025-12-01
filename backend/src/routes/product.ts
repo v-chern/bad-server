@@ -12,10 +12,16 @@ import {
     validateProductUpdateBody,
 } from '../middlewares/validations'
 import { Role } from '../models/user'
+import { normalizePagination } from '../middlewares/pagination'
+import { PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE } from '../contants'
 
 const productRouter = Router()
 
-productRouter.get('/', getProducts)
+productRouter.get(
+    '/',
+    normalizePagination(PAGE_DEFAULT, PAGE_DEFAULT_SIZE, PAGE_MAX_SIZE),
+    getProducts
+)
 productRouter.post(
     '/',
     auth,

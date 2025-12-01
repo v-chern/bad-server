@@ -6,7 +6,7 @@ import BadRequestError from '../errors/bad-request-error'
 import ConflictError from '../errors/conflict-error'
 import NotFoundError from '../errors/not-found-error'
 import Product from '../models/product'
-import movingFile from '../utils/movingFile'
+import { movingFile } from '../utils/files'
 
 // GET /product
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
